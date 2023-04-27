@@ -1,19 +1,37 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '3.0.5'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+apply plugin: 'io.spring.dependency-management'
+
+group 'org.crypto'
+version '0.0.1'
+
+sourceCompatibility = '1.17'
+
+ext {
+    junitVersion = '5.9.2'
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
 }
 
 test {
     useJUnitPlatform()
+}
+
+bootJar {
+    enabled = true
 }

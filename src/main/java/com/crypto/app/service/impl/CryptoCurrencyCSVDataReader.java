@@ -4,6 +4,7 @@ import com.crypto.app.exception.DataReaderException;
 import com.crypto.app.model.response.CryptoCurrencyDataReaderResponse;
 import com.crypto.app.service.CryptoCurrencyDataReader;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,9 @@ import java.util.Collections;
 import java.util.List;
 
 @Slf4j
+@Qualifier("CSV")
 @Service
-public class CryptoCurrencyCSVReader implements CryptoCurrencyDataReader<String> {
+public class CryptoCurrencyCSVDataReader implements CryptoCurrencyDataReader<String> {
     private static final Integer ATTRIBUTES_LENGTH = 3;
     private static final String COMMA_DELIMITER = ",";
 

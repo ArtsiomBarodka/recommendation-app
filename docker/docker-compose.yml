@@ -14,7 +14,7 @@ services:
       timeout: 10s
       retries: 5
     environment:
-      MYSQL_DATABASE: kafka
+      MYSQL_DATABASE: recommendation
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: password

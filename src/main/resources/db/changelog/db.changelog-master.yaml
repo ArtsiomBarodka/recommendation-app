@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/create-schema.xml
+  - include:
+      file: db/changelog/insert-crypto-symbol-data.xml

@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class CryptoSymbol {
     private Long id;
-    private String name;
+    private CryptoSymbolType name;
 }

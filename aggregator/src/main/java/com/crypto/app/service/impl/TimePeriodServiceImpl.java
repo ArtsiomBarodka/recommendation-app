@@ -6,6 +6,7 @@ import com.crypto.app.service.TimePeriodService;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -37,17 +38,17 @@ public class TimePeriodServiceImpl implements TimePeriodService {
             case YEAR, CURRENT_YEAR -> {
                 var start = LocalDateTime.of(requestedYear, Month.JANUARY, 1, 0, 0);
                 var end = LocalDateTime.of(requestedYear, Month.DECEMBER, Month.DECEMBER.maxLength(), 23, 59, 59);
-                yield new TimeRange(start, end);
+                yield new TimeRange(Timestamp.valueOf(start), Timestamp.valueOf(end));
             }
             case MONTH, CURRENT_MONTH -> {
                 var start = LocalDateTime.of(requestedYear, requestedMonth, 1, 0, 0);
                 var end = LocalDateTime.of(requestedYear, requestedMonth, requestedMonth.maxLength(), 23, 59, 59);
-                yield new TimeRange(start, end);
+                yield new TimeRange(Timestamp.valueOf(start), Timestamp.valueOf(end));
             }
             case DAY, CURRENT_DAY -> {
                 var start = LocalDateTime.of(requestedYear, requestedMonth, requestedDate.getDayOfMonth(), 0, 0);
                 var end = LocalDateTime.of(requestedYear, requestedMonth, requestedDate.getDayOfMonth(), 23, 59, 59);
-                yield new TimeRange(start, end);
+                yield new TimeRange(Timestamp.valueOf(start), Timestamp.valueOf(end));
             }
         };
     }

@@ -12,11 +12,14 @@ import java.util.List;
 
 public interface AggregationService {
     @NonNull
-    Currency getAggregatedCurrency(@NonNull SymbolType symbolType, @NonNull AggregationRule aggregationRule);
+    Currency getCurrency(@NonNull SymbolType symbolType, @NonNull AggregationRule aggregationRule);
 
     @NonNull
-    Currency getAggregatedCurrency(@NonNull SymbolType symbolType, @NonNull AggregationRule aggregationRule, @NonNull TimeRange timeRange);
+    Currency getCurrency(@NonNull SymbolType symbolType, @NonNull AggregationRule aggregationRule, @NonNull TimeRange timeRange);
 
     @NonNull
-    List<SymbolWithRange> getAllSymbolsWithNormalisedRangeSortedBy(@NonNull SortMode sortMode);
+    List<SymbolWithRange> getAllSymbolsWithNormalisedRange(@NonNull SortMode sortMode);
+
+    @NonNull
+    SymbolWithRange getSymbolWithHighestNormalisedRange(@NonNull TimeRange timeRange);
 }

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
 
@@ -36,7 +35,7 @@ public class AggregationServiceImpl implements AggregationService {
     private final SymbolRepository symbolRepository;
 
     @Override
-    public Currency getAggregatedCurrency(SymbolType symbolType, AggregationRule aggregationRule) {
+    public Currency getCurrency(SymbolType symbolType, AggregationRule aggregationRule) {
         var aggregationResult = currencyRepository.findAllBySymbolName(symbolType, aggregationRule.getPageRequest());
 
         if (aggregationResult.isEmpty()) {
@@ -51,12 +50,12 @@ public class AggregationServiceImpl implements AggregationService {
     }
 
     @Override
-    public Currency getAggregatedCurrency(SymbolType symbolType, AggregationRule aggregationRule, TimeRange timeRange) {
-        var aggregationResult = currencyRepository.findAllBySymbolNameAndTimestampBetween(symbolType, Timestamp.valueOf(timeRange.start()), Timestamp.valueOf(timeRange.end()), aggregationRule.getPageRequest());
+    public Currency getCurrency(SymbolType symbolType, AggregationRule aggregationRule, TimeRange timeRange) {
+        var aggregationResult = currencyRepository.findAllBySymbolNameAndTimestampBetween(symbolType, timeRange.start(), timeRange.end(), aggregationRule.getPageRequest());
 
         if (aggregationResult.isEmpty()) {
             log.warn("Currency with (symbol = {}, aggregator = {}, timeRange = {}) is not found", symbolType, aggregationRule, timeRange);
-            throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s) is not found".formatted(symbolType, aggregationRule));
+            throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s, timeRange = %s) is not found".formatted(symbolType, aggregationRule, timeRange));
         }
 
         var result = aggregationResult.get(0);
@@ -66,7 +65,42 @@ public class AggregationServiceImpl implements AggregationService {
     }
 
     @Override
-    public List<SymbolWithRange> getAllSymbolsWithNormalisedRangeSortedBy(@NonNull SortMode sortMode) {
+    public SymbolWithRange getSymbolWithHighestNormalisedRange(TimeRange timeRange) {
+        var allSymbols = symbolRepository.findAll();
+
+        var symbolWithMaxRange = allSymbols.parallelStream().map(symbol -> {
+                    var maxPriceCurrency = currencyRepository.findAllBySymbolNameAndTimestampBetween(symbol.getName(), timeRange.start(), timeRange.end(), AggregationRule.PRICE_MAX.getPageRequest());
+                    if (maxPriceCurrency.isEmpty()) {
+                        log.warn("Currency with (symbol = {}, aggregator = {}) for time range = {} is not found ", symbol, AggregationRule.PRICE_MAX, timeRange);
+                        throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s) for time range = %s is not found".formatted(symbol, AggregationRule.PRICE_MAX, timeRange));
+                    }
+
+                    var minPriceCurrency = currencyRepository.findAllBySymbolName(symbol.getName(), AggregationRule.PRICE_MIN.getPageRequest());
+                    if (minPriceCurrency.isEmpty()) {
+                        log.warn("Currency with (symbol = {}, aggregator = {}) for time range = {} is not found", symbol, AggregationRule.PRICE_MIN, timeRange);
+                        throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s) for time range = %s is not found".formatted(symbol, AggregationRule.PRICE_MIN, timeRange));
+                    }
+
+                    var normalizedRange = calculateNormalizedRange(maxPriceCurrency, minPriceCurrency);
+
+                    var symbolWithRange = toSymbolWithRangeDto(symbol, normalizedRange);
+                    log.info("Symbol with normalized range is found. Symbol: {}", symbolWithRange);
+
+                    return symbolWithRange;
+                })
+                .max(ASC_SYMBOL_WITH_RANGE_COMPARATOR)
+                .orElseThrow(() -> {
+                    log.warn("Symbol with highest normalized range is not found.");
+                    throw new DataNotFoundException("Symbol with highest normalized range is not found.");
+                });
+
+        log.info("Symbol with highest normalized range is found. Symbol: {}", symbolWithMaxRange);
+
+        return symbolWithMaxRange;
+    }
+
+    @Override
+    public List<SymbolWithRange> getAllSymbolsWithNormalisedRange(@NonNull SortMode sortMode) {
         var allSymbols = symbolRepository.findAll();
         var comparing = SortMode.ASC == sortMode ? ASC_SYMBOL_WITH_RANGE_COMPARATOR : DESC_SYMBOL_WITH_RANGE_COMPARATOR;
 

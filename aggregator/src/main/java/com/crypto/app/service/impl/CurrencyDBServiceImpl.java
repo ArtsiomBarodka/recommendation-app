@@ -6,8 +6,8 @@ import com.crypto.app.model.dto.Currency;
 import com.crypto.app.model.dto.Symbol;
 import com.crypto.app.model.entity.CurrencyEntity;
 import com.crypto.app.model.entity.SymbolEntity;
-import com.crypto.app.repository.CryptoCurrencyRepository;
-import com.crypto.app.repository.CryptoSymbolRepository;
+import com.crypto.app.repository.CurrencyRepository;
+import com.crypto.app.repository.SymbolRepository;
 import com.crypto.app.service.CurrencyDBService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CurrencyDBServiceImpl implements CurrencyDBService {
-    private final CryptoCurrencyRepository cryptoCurrencyRepository;
-    private final CryptoSymbolRepository cryptoSymbolRepository;
+    private final CurrencyRepository currencyRepository;
+    private final SymbolRepository symbolRepository;
 
     @Override
     @Transactional
@@ -34,7 +34,7 @@ public class CurrencyDBServiceImpl implements CurrencyDBService {
                 .map(currency -> toEntity(currency, symbolEntityMap))
                 .toList();
 
-        var savedCryptoCurrencyEntityList = cryptoCurrencyRepository.saveAll(cryptoCurrencyEntityList);
+        var savedCryptoCurrencyEntityList = currencyRepository.saveAll(cryptoCurrencyEntityList);
 
         log.info("Saved to db currency List. Currencies: {}", savedCryptoCurrencyEntityList);
 
@@ -46,7 +46,7 @@ public class CurrencyDBServiceImpl implements CurrencyDBService {
                 .map(currency -> currency.getSymbol().getName())
                 .collect(Collectors.toSet());
 
-        var symbolEntityList = cryptoSymbolRepository.findAllByNameIn(symbols);
+        var symbolEntityList = symbolRepository.findAllByNameIn(symbols);
         return symbolEntityList.stream().collect(Collectors.toMap(SymbolEntity::getName, symbol -> symbol));
     }
 

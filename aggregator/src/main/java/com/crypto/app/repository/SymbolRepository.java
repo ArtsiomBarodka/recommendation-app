@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface CryptoSymbolRepository extends JpaRepository<SymbolEntity, Long> {
+public interface SymbolRepository extends JpaRepository<SymbolEntity, Long> {
     @NonNull
     Optional<SymbolEntity> findByName(@NonNull String name);
 

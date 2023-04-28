@@ -4,26 +4,40 @@ import com.crypto.app.exception.DataNotFoundException;
 import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.AggregationRule;
 import com.crypto.app.model.dto.Currency;
+import com.crypto.app.model.dto.SortMode;
 import com.crypto.app.model.dto.Symbol;
+import com.crypto.app.model.dto.SymbolWithRange;
 import com.crypto.app.model.dto.TimeRange;
 import com.crypto.app.model.entity.CurrencyEntity;
-import com.crypto.app.repository.CryptoCurrencyRepository;
+import com.crypto.app.model.entity.SymbolEntity;
+import com.crypto.app.repository.CurrencyRepository;
+import com.crypto.app.repository.SymbolRepository;
 import com.crypto.app.service.AggregationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.util.Comparator;
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AggregationServiceImpl implements AggregationService {
-    private final CryptoCurrencyRepository cryptoCurrencyRepository;
+    private static final Comparator<SymbolWithRange> ASC_SYMBOL_WITH_RANGE_COMPARATOR = Comparator.comparing(SymbolWithRange::getNormalizedRange);
+
+    private static final Comparator<SymbolWithRange> DESC_SYMBOL_WITH_RANGE_COMPARATOR = Comparator.comparing(SymbolWithRange::getNormalizedRange).reversed();
+
+    private final CurrencyRepository currencyRepository;
+    private final SymbolRepository symbolRepository;
 
     @Override
     public Currency getAggregatedCurrency(SymbolType symbolType, AggregationRule aggregationRule) {
-        var aggregationResult = cryptoCurrencyRepository.findAllBySymbolName(symbolType, aggregationRule.getPageRequest());
+        var aggregationResult = currencyRepository.findAllBySymbolName(symbolType, aggregationRule.getPageRequest());
 
         if (aggregationResult.isEmpty()) {
             log.warn("Currency with (symbol = {}, aggregator = {}) is not found", symbolType, aggregationRule);
@@ -38,7 +52,7 @@ public class AggregationServiceImpl implements AggregationService {
 
     @Override
     public Currency getAggregatedCurrency(SymbolType symbolType, AggregationRule aggregationRule, TimeRange timeRange) {
-        var aggregationResult = cryptoCurrencyRepository.findAllBySymbolNameAndTimestampBetween(symbolType, Timestamp.valueOf(timeRange.start()), Timestamp.valueOf(timeRange.end()), aggregationRule.getPageRequest());
+        var aggregationResult = currencyRepository.findAllBySymbolNameAndTimestampBetween(symbolType, Timestamp.valueOf(timeRange.start()), Timestamp.valueOf(timeRange.end()), aggregationRule.getPageRequest());
 
         if (aggregationResult.isEmpty()) {
             log.warn("Currency with (symbol = {}, aggregator = {}, timeRange = {}) is not found", symbolType, aggregationRule, timeRange);
@@ -49,6 +63,49 @@ public class AggregationServiceImpl implements AggregationService {
         log.info("Currency with (symbol = {}, aggregator = {}, timeRange = {}) is found. Currency: {}", symbolType, aggregationRule, timeRange, result);
 
         return toCurrencyDto(result);
+    }
+
+    @Override
+    public List<SymbolWithRange> getAllSymbolsWithNormalisedRangeSortedBy(@NonNull SortMode sortMode) {
+        var allSymbols = symbolRepository.findAll();
+        var comparing = SortMode.ASC == sortMode ? ASC_SYMBOL_WITH_RANGE_COMPARATOR : DESC_SYMBOL_WITH_RANGE_COMPARATOR;
+
+        return allSymbols.parallelStream().map(symbol -> {
+            var maxPriceCurrency = currencyRepository.findAllBySymbolName(symbol.getName(), AggregationRule.PRICE_MAX.getPageRequest());
+            if (maxPriceCurrency.isEmpty()) {
+                log.warn("Currency with (symbol = {}, aggregator = {}) is not found", symbol, AggregationRule.PRICE_MAX);
+                throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s) is not found".formatted(symbol, AggregationRule.PRICE_MAX));
+            }
+
+            var minPriceCurrency = currencyRepository.findAllBySymbolName(symbol.getName(), AggregationRule.PRICE_MIN.getPageRequest());
+            if (minPriceCurrency.isEmpty()) {
+                log.warn("Currency with (symbol = {}, aggregator = {}) is not found", symbol, AggregationRule.PRICE_MIN);
+                throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s) is not found".formatted(symbol, AggregationRule.PRICE_MIN));
+            }
+
+            var normalizedRange = calculateNormalizedRange(maxPriceCurrency, minPriceCurrency);
+
+            var symbolWithRange = toSymbolWithRangeDto(symbol, normalizedRange);
+            log.info("Symbol with normalized range is found. Symbol: {}", symbolWithRange);
+
+            return symbolWithRange;
+        }).sorted(comparing).toList();
+    }
+
+    private SymbolWithRange toSymbolWithRangeDto(SymbolEntity source, BigDecimal normalizedRange) {
+        var symbolWithRange = new SymbolWithRange();
+        symbolWithRange.setId(source.getId());
+        symbolWithRange.setName(source.getName());
+        symbolWithRange.setNormalizedRange(normalizedRange);
+
+        return symbolWithRange;
+    }
+
+    private BigDecimal calculateNormalizedRange(List<CurrencyEntity> maxPriceCurrency, List<CurrencyEntity> minPriceCurrency) {
+        var maxPrice = maxPriceCurrency.get(0).getPrice();
+        var minPrice = minPriceCurrency.get(0).getPrice();
+
+        return maxPrice.subtract(minPrice).divide(minPrice, 4, RoundingMode.HALF_UP);
     }
 
     private Currency toCurrencyDto(CurrencyEntity source) {

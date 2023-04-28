@@ -3,6 +3,8 @@ package com.crypto.app.rest;
 import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.AggregationRule;
 import com.crypto.app.model.dto.Currency;
+import com.crypto.app.model.dto.SortMode;
+import com.crypto.app.model.dto.SymbolWithRange;
 import com.crypto.app.model.dto.TimePeriod;
 import com.crypto.app.service.AggregationService;
 import com.crypto.app.service.TimePeriodService;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/crypto/recommendation")
 @RequiredArgsConstructor
@@ -21,7 +25,7 @@ public class RecommendationController {
     private final AggregationService aggregationService;
     private final TimePeriodService timePeriodService;
 
-    @GetMapping("/{symbol}/{aggregator}")
+    @GetMapping("currencies/{symbol}/{aggregator}")
     public ResponseEntity<Currency> getOldestCryptoCurrency(
             @PathVariable("symbol") String symbol,
             @PathVariable("aggregator") String aggregator,
@@ -40,5 +44,14 @@ public class RecommendationController {
             Currency aggregatedCurrency = aggregationService.getAggregatedCurrency(cryptoSymbol, rule);
             return ResponseEntity.ok(aggregatedCurrency);
         }
+    }
+
+    @GetMapping("symbols/with_range")
+    public ResponseEntity<List<SymbolWithRange>> getOldestCryptoCurrency(
+            @RequestParam(value = "sort", required = false) String sortBy) {
+        var allSymbolsSortedByNormalisedRange = aggregationService.getAllSymbolsWithNormalisedRangeSortedBy(SortMode.of(sortBy));
+
+
+        return ResponseEntity.ok(allSymbolsSortedByNormalisedRange);
     }
 }

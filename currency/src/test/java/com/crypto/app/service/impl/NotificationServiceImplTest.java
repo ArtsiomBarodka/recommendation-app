@@ -2,8 +2,8 @@ package com.crypto.app.service.impl;
 
 import com.crypto.app.config.KafkaProducerConfig;
 import com.crypto.app.config.PropertiesConfig;
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.Currency;
+import com.crypto.app.model.dto.EventType;
 import com.crypto.app.model.dto.Symbol;
 import com.crypto.app.model.message.CurrencyMessage;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -55,7 +55,7 @@ public class NotificationServiceImplTest {
         // Arrange
         var symbol = new Symbol();
         symbol.setId(1L);
-        symbol.setName(SymbolType.BTC);
+        symbol.setName("symbol");
 
         var currency = new Currency();
         currency.setId(1L);
@@ -64,7 +64,7 @@ public class NotificationServiceImplTest {
         currency.setSymbol(symbol);
 
         // Act
-        notificationService.notifyAggregator(currency);
+        notificationService.notifyAggregator(currency, EventType.ADDED);
 
         // Assert
         try (Consumer<String, CurrencyMessage> consumer = createConsumer()) {
@@ -73,7 +73,7 @@ public class NotificationServiceImplTest {
             assertThat(records.count()).isEqualTo(1);
 
             ConsumerRecord<String, CurrencyMessage> record = records.iterator().next();
-            assertThat(record.key()).isEqualTo(currency.getSymbol().getName().name());
+            assertThat(record.key()).isEqualTo(currency.getSymbol().getName());
             assertThat(record.value().getId()).isEqualTo(currency.getId());
             assertThat(record.value().getTimestamp().getTime()).isEqualTo(currency.getTimestamp().getTime());
             assertThat(record.value().getPrice()).isEqualTo(currency.getPrice());

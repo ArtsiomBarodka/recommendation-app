@@ -1,7 +1,6 @@
 package com.crypto.app.service.impl;
 
 import com.crypto.app.exception.DataNotFoundException;
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.Currency;
 import com.crypto.app.model.dto.Symbol;
 import com.crypto.app.model.entity.CurrencyEntity;
@@ -38,9 +37,10 @@ public class CurrencyDBServiceImplTest {
 
     @Test
     void saveAllTest() {
-        var currency = createCurrency(1L, SymbolType.DOGE);
+        var symbolName = "name";
+        var currency = createCurrency(symbolName);
 
-        var resultSymbolEntity = new SymbolEntity(1L, SymbolType.DOGE);
+        var resultSymbolEntity = new SymbolEntity(1L, symbolName);
         var resultCurrencyEntity = new CurrencyEntity(1L, Timestamp.valueOf(LocalDateTime.now()), resultSymbolEntity, BigDecimal.valueOf(10));
 
         when(symbolRepository.findAllByNameIn(any())).thenReturn(List.of(resultSymbolEntity));
@@ -61,17 +61,18 @@ public class CurrencyDBServiceImplTest {
 
     @Test
     void saveAllTest_symbolIsNotExist() {
-        var currency = createCurrency(2L, SymbolType.DOGE);
+        var symbolName = "name";
+        var currency = createCurrency(symbolName);
 
-        when(symbolRepository.findAllByNameIn(any())).thenReturn(List.of(new SymbolEntity(1L, SymbolType.BTC)));
+        when(symbolRepository.findAllByNameIn(any())).thenReturn(List.of(new SymbolEntity(1L, "anotherName")));
 
         assertThrows(DataNotFoundException.class, () -> currencyDBService.saveAll(List.of(currency)));
     }
 
-    private Currency createCurrency(long symbolId, SymbolType symbolType) {
+    private Currency createCurrency(String symbolName) {
         var symbol = new Symbol();
-        symbol.setId(symbolId);
-        symbol.setName(symbolType);
+        symbol.setId(1L);
+        symbol.setName(symbolName);
 
         var currency = new Currency();
         currency.setPrice(BigDecimal.valueOf(10));

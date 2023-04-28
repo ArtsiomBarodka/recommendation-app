@@ -3,7 +3,6 @@ package com.crypto.app.listener;
 import com.crypto.app.config.KafkaConsumerConfig;
 import com.crypto.app.config.KafkaProducerConfig;
 import com.crypto.app.config.PropertiesConfig;
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.message.CurrencyMessage;
 import com.crypto.app.model.message.SymbolMessageItem;
 import com.crypto.app.service.CurrencyDBService;
@@ -98,14 +97,14 @@ public class CurrencyKafkaListenerTest {
 
         // Assert
         Awaitility.await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-            verify(currencyDBService, times(3)).saveAll(any());
+            verify(currencyDBService, times(4)).saveAll(any());
         });
     }
 
     private CurrencyMessage getCurrencyMessage() {
         var symbolMessageItem = new SymbolMessageItem();
         symbolMessageItem.setId(1L);
-        symbolMessageItem.setName(SymbolType.ETH);
+        symbolMessageItem.setName("name");
 
         var notificationMessage = new CurrencyMessage();
         notificationMessage.setId(1L);

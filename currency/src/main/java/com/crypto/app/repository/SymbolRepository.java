@@ -1,6 +1,5 @@
 package com.crypto.app.repository;
 
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.entity.SymbolEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
@@ -14,5 +13,5 @@ public interface SymbolRepository extends JpaRepository<SymbolEntity, Long> {
     Optional<SymbolEntity> findByName(@NonNull String name);
 
     @NonNull
-    List<SymbolEntity> findAllByNameIn(@NonNull Collection<SymbolType> names);
+    List<SymbolEntity> findAllByNameIn(@NonNull Collection<String> names);
 }

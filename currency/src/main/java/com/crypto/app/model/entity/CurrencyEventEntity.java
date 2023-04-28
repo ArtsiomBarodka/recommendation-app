@@ -1,6 +1,5 @@
 package com.crypto.app.model.entity;
 
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.EventType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -2,6 +2,7 @@ package com.crypto.app.service.impl;
 
 import com.crypto.app.config.PropertiesConfig;
 import com.crypto.app.model.dto.Currency;
+import com.crypto.app.model.dto.EventType;
 import com.crypto.app.model.message.CurrencyMessage;
 import com.crypto.app.model.message.SymbolMessageItem;
 import com.crypto.app.service.NotificationService;
@@ -18,9 +19,9 @@ public class NotificationServiceImpl implements NotificationService {
     private final PropertiesConfig propertiesConfig;
 
     @Override
-    public void notifyAggregator(Currency currency) {
-        var topic = propertiesConfig.getKafkaTopicCurrencyName();
-        var key = currency.getSymbol().getName().name();
+    public void notifyAggregator(Currency currency, EventType eventType) {
+        var topic = getTopic(eventType);
+        var key = currency.getSymbol().getName();
         var message = toMessage(currency);
 
         log.info("Sending Currency notification to {} topic with id {} and Message: {}", topic, key, message);
@@ -40,5 +41,13 @@ public class NotificationServiceImpl implements NotificationService {
         message.setPrice(source.getPrice());
 
         return message;
+    }
+
+    private String getTopic(EventType eventType) {
+        return switch (eventType) {
+            case ADDED -> propertiesConfig.getKafkaTopicCurrencyName();
+            case REMOVED -> propertiesConfig.getKafkaTopicCurrencyName();
+            case UPDATED -> propertiesConfig.getKafkaTopicCurrencyName();
+        };
     }
 }

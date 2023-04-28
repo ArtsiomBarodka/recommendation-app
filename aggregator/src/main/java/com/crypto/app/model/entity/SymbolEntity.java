@@ -1,10 +1,7 @@
 package com.crypto.app.model.entity;
 
-import com.crypto.app.model.SymbolType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,7 +17,6 @@ public class SymbolEntity {
     @Id
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "name", nullable = false)
-    private SymbolType name;
+    private String name;
 }

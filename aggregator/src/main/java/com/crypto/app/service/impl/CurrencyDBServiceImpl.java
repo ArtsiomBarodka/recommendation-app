@@ -1,7 +1,6 @@
 package com.crypto.app.service.impl;
 
 import com.crypto.app.exception.DataNotFoundException;
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.Currency;
 import com.crypto.app.model.dto.Symbol;
 import com.crypto.app.model.entity.CurrencyEntity;
@@ -41,7 +40,7 @@ public class CurrencyDBServiceImpl implements CurrencyDBService {
         return savedCryptoCurrencyEntityList.stream().map(this::toDto).toList();
     }
 
-    private Map<SymbolType, SymbolEntity> getSymbolEntityMap(List<Currency> currencyList) {
+    private Map<String, SymbolEntity> getSymbolEntityMap(List<Currency> currencyList) {
         var symbols = currencyList.stream()
                 .map(currency -> currency.getSymbol().getName())
                 .collect(Collectors.toSet());
@@ -51,7 +50,7 @@ public class CurrencyDBServiceImpl implements CurrencyDBService {
     }
 
 
-    private CurrencyEntity toEntity(Currency source, Map<SymbolType, SymbolEntity> symbolEntityMap) {
+    private CurrencyEntity toEntity(Currency source, Map<String, SymbolEntity> symbolEntityMap) {
         var cryptoSymbolName = source.getSymbol().getName();
         var cryptoSymbolEntity = symbolEntityMap.get(cryptoSymbolName);
         if (cryptoSymbolEntity == null) {

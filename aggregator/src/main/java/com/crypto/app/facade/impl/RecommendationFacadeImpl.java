@@ -1,13 +1,13 @@
 package com.crypto.app.facade.impl;
 
 import com.crypto.app.facade.RecommendationFacade;
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.AggregationRule;
 import com.crypto.app.model.dto.Currency;
 import com.crypto.app.model.dto.SortMode;
 import com.crypto.app.model.dto.SymbolWithRange;
 import com.crypto.app.model.dto.TimePeriod;
 import com.crypto.app.service.AggregationService;
+import com.crypto.app.service.SymbolDBService;
 import com.crypto.app.service.TimePeriodService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,11 +20,12 @@ import java.util.Optional;
 public class RecommendationFacadeImpl implements RecommendationFacade {
     private final AggregationService aggregationService;
     private final TimePeriodService timePeriodService;
+    private final SymbolDBService symbolDBService;
 
     @Override
     public Currency getCurrency(String symbol, String aggregator, Optional<String> period, Optional<String> date) {
         var rule = AggregationRule.of(aggregator);
-        var cryptoSymbol = SymbolType.of(symbol);
+        var cryptoSymbol = symbolDBService.getSymbolByName(symbol);
 
         if (period.isPresent()) {
             TimePeriod timePeriod = TimePeriod.of(period.get());

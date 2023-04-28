@@ -1,14 +1,13 @@
 package com.crypto.app.facade.impl;
 
-import com.crypto.app.exception.DataNotFoundException;
 import com.crypto.app.facade.CurrencyDataLoadFacade;
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.Currency;
-import com.crypto.app.model.dto.Symbol;
+import com.crypto.app.model.dto.EventType;
 import com.crypto.app.model.response.CurrencyDataReaderResponse;
 import com.crypto.app.service.CurrencyDBService;
 import com.crypto.app.service.CurrencyDataReader;
 import com.crypto.app.service.NotificationService;
+import com.crypto.app.service.SymbolDBService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,13 +20,16 @@ public class CurrencyDataLoadFacadeImpl implements CurrencyDataLoadFacade {
     private final CurrencyDataReader<String> fileDataReader;
     private final CurrencyDBService currencyDBService;
     private final NotificationService notificationService;
+    private final SymbolDBService symbolDBService;
 
     public CurrencyDataLoadFacadeImpl(@Qualifier("File") CurrencyDataReader<String> fileDataReader,
                                       CurrencyDBService currencyDBService,
-                                      NotificationService notificationService) {
+                                      NotificationService notificationService,
+                                      SymbolDBService symbolDBService) {
         this.fileDataReader = fileDataReader;
         this.currencyDBService = currencyDBService;
         this.notificationService = notificationService;
+        this.symbolDBService = symbolDBService;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class CurrencyDataLoadFacadeImpl implements CurrencyDataLoadFacade {
 
         var savedCurrencyList = currencyDBService.saveAll(cryptoCurrencyList);
 
-        savedCurrencyList.forEach(notificationService::notifyAggregator);
+        savedCurrencyList.forEach(savedCurrency -> notificationService.notifyAggregator(savedCurrency, EventType.ADDED));
     }
 
     @Override
@@ -51,18 +53,12 @@ public class CurrencyDataLoadFacadeImpl implements CurrencyDataLoadFacade {
     }
 
     private Currency toDto(CurrencyDataReaderResponse source) {
-        var cryptoSymbol = new Symbol();
-        var symbolType = SymbolType.of(source.cryptoSymbol());
-        if (symbolType == null) {
-            log.error("Symbol time with name {} is not found", source.cryptoSymbol());
-            throw new DataNotFoundException("Symbol time with name %s is not found".formatted(source.cryptoSymbol()));
-        }
-        cryptoSymbol.setName(symbolType);
+        var symbol = symbolDBService.getSymbolByName(source.cryptoSymbol());
 
         var cryptoCurrency = new Currency();
         cryptoCurrency.setPrice(source.price());
         cryptoCurrency.setTimestamp(source.timestamp());
-        cryptoCurrency.setSymbol(cryptoSymbol);
+        cryptoCurrency.setSymbol(symbol);
 
         return cryptoCurrency;
     }

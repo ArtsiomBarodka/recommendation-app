@@ -35,10 +35,10 @@
 
         <createTable tableName="symbols" remarks="Crypto Symbol Data">
             <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true"/>
+                <constraints unique="true" primaryKey="true"/>
             </column>
             <column name="name" type="varchar(100)">
-                <constraints nullable="false"/>
+                <constraints unique="true" nullable="false"/>
             </column>
         </createTable>
 

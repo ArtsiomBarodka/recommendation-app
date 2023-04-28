@@ -1,7 +1,6 @@
 package com.crypto.app.service.impl;
 
 import com.crypto.app.exception.DataNotFoundException;
-import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.AggregationRule;
 import com.crypto.app.model.dto.Currency;
 import com.crypto.app.model.dto.SortMode;
@@ -35,31 +34,31 @@ public class AggregationServiceImpl implements AggregationService {
     private final SymbolRepository symbolRepository;
 
     @Override
-    public Currency getCurrency(SymbolType symbolType, AggregationRule aggregationRule) {
-        var aggregationResult = currencyRepository.findAllBySymbolName(symbolType, aggregationRule.getPageRequest());
+    public Currency getCurrency(Symbol symbol, AggregationRule aggregationRule) {
+        var aggregationResult = currencyRepository.findAllBySymbolName(symbol.getName(), aggregationRule.getPageRequest());
 
         if (aggregationResult.isEmpty()) {
-            log.warn("Currency with (symbol = {}, aggregator = {}) is not found", symbolType, aggregationRule);
-            throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s) is not found".formatted(symbolType, aggregationRule));
+            log.warn("Currency with (symbol = {}, aggregator = {}) is not found", symbol, aggregationRule);
+            throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s) is not found".formatted(symbol, aggregationRule));
         }
 
         var result = aggregationResult.get(0);
-        log.info("Currency with (symbol = {}, aggregator = {}) is found. Currency: {}", symbolType, aggregationRule, result);
+        log.info("Currency with (symbol = {}, aggregator = {}) is found. Currency: {}", symbol, aggregationRule, result);
 
         return toCurrencyDto(result);
     }
 
     @Override
-    public Currency getCurrency(SymbolType symbolType, AggregationRule aggregationRule, TimeRange timeRange) {
-        var aggregationResult = currencyRepository.findAllBySymbolNameAndTimestampBetween(symbolType, timeRange.start(), timeRange.end(), aggregationRule.getPageRequest());
+    public Currency getCurrency(Symbol symbol, AggregationRule aggregationRule, TimeRange timeRange) {
+        var aggregationResult = currencyRepository.findAllBySymbolNameAndTimestampBetween(symbol.getName(), timeRange.start(), timeRange.end(), aggregationRule.getPageRequest());
 
         if (aggregationResult.isEmpty()) {
-            log.warn("Currency with (symbol = {}, aggregator = {}, timeRange = {}) is not found", symbolType, aggregationRule, timeRange);
-            throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s, timeRange = %s) is not found".formatted(symbolType, aggregationRule, timeRange));
+            log.warn("Currency with (symbol = {}, aggregator = {}, timeRange = {}) is not found", symbol, aggregationRule, timeRange);
+            throw new DataNotFoundException("Currency with (symbol = %s, aggregator = %s, timeRange = %s) is not found".formatted(symbol, aggregationRule, timeRange));
         }
 
         var result = aggregationResult.get(0);
-        log.info("Currency with (symbol = {}, aggregator = {}, timeRange = {}) is found. Currency: {}", symbolType, aggregationRule, timeRange, result);
+        log.info("Currency with (symbol = {}, aggregator = {}, timeRange = {}) is found. Currency: {}", symbol, aggregationRule, timeRange, result);
 
         return toCurrencyDto(result);
     }

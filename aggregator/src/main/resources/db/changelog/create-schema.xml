@@ -15,7 +15,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="symbol_id" type="bigint">
-<!--                <constraints nullable="false"/>-->
             </column>
             <column name="price" type="decimal(20,4)">
                 <constraints nullable="false"/>
@@ -24,10 +23,10 @@
 
         <createTable tableName="symbols" remarks="Crypto Symbol Data">
             <column name="id" type="bigint">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints unique="true" nullable="false" primaryKey="true"/>
             </column>
             <column name="name" type="varchar(100)">
-                <constraints nullable="false"/>
+                <constraints unique="true" nullable="false"/>
             </column>
         </createTable>
 

@@ -6,6 +6,11 @@ import org.springframework.lang.NonNull;
 import java.util.List;
 
 public interface CurrencyDBService {
+    /**
+     *
+     * @param currencyList
+     * @return
+     */
     @NonNull
     List<Currency> saveAll(List<Currency> currencyList);
 }

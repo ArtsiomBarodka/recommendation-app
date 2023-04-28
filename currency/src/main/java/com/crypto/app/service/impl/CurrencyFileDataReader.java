@@ -1,7 +1,7 @@
 package com.crypto.app.service.impl;
 
 import com.crypto.app.exception.DataReaderException;
-import com.crypto.app.model.response.CryptoCurrencyDataReaderResponse;
+import com.crypto.app.model.response.CurrencyDataReaderResponse;
 import com.crypto.app.service.CurrencyDataReader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,8 +25,8 @@ public class CurrencyFileDataReader implements CurrencyDataReader<String> {
     private static final String COMMA_DELIMITER = ",";
 
     @Override
-    public @NonNull List<CryptoCurrencyDataReaderResponse> read(@NonNull String path) {
-        List<CryptoCurrencyDataReaderResponse> cryptoCurrencyList = Collections.emptyList();
+    public @NonNull List<CurrencyDataReaderResponse> read(@NonNull String path) {
+        List<CurrencyDataReaderResponse> cryptoCurrencyList = Collections.emptyList();
 
         try (var fileStream = Files.lines(toPath(path))) {
             cryptoCurrencyList = fileStream
@@ -53,14 +53,14 @@ public class CurrencyFileDataReader implements CurrencyDataReader<String> {
         return file.toPath();
     }
 
-    private CryptoCurrencyDataReaderResponse toCryptoCurrency(String line) {
+    private CurrencyDataReaderResponse toCryptoCurrency(String line) {
         var attributes = line.split(COMMA_DELIMITER);
         if (attributes.length != ATTRIBUTES_LENGTH) {
             log.error("There is an exception during reading file line = {}. Wrong number of attributes (Have = {} , Need = {})", line, attributes.length, ATTRIBUTES_LENGTH);
             throw new DataReaderException("There is an exception during reading file line = %s. Wrong number of attributes (Have = %d , Need = %d)".formatted(line, attributes.length, ATTRIBUTES_LENGTH));
         }
 
-        return new CryptoCurrencyDataReaderResponse(
+        return new CurrencyDataReaderResponse(
                 new Timestamp(Long.parseLong(attributes[0])),
                 attributes[1],
                 new BigDecimal(attributes[2]));

@@ -1,6 +1,7 @@
 ext {
     mySqlConnectorVersion = '8.0.32'
     liquibaseVersion = '4.21.1'
+    kafkaTestcontainersVersion = '1.17.6'
 }
 
 dependencies {
@@ -12,6 +13,11 @@ dependencies {
 
     implementation "mysql:mysql-connector-java:${mySqlConnectorVersion}"
     implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation "org.testcontainers:junit-jupiter:${kafkaTestcontainersVersion}"
+    testImplementation "org.testcontainers:kafka:${kafkaTestcontainersVersion}"
 }
 
 bootJar {

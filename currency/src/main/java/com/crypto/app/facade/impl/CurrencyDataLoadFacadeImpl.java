@@ -1,10 +1,11 @@
 package com.crypto.app.facade.impl;
 
+import com.crypto.app.exception.DataNotFoundException;
 import com.crypto.app.facade.CurrencyDataLoadFacade;
 import com.crypto.app.model.SymbolType;
 import com.crypto.app.model.dto.Currency;
 import com.crypto.app.model.dto.Symbol;
-import com.crypto.app.model.response.CryptoCurrencyDataReaderResponse;
+import com.crypto.app.model.response.CurrencyDataReaderResponse;
 import com.crypto.app.service.CurrencyDBService;
 import com.crypto.app.service.CurrencyDataReader;
 import com.crypto.app.service.NotificationService;
@@ -45,13 +46,18 @@ public class CurrencyDataLoadFacadeImpl implements CurrencyDataLoadFacade {
     }
 
     @Override
-    public void loadDataFromFile(List<String> filePath) {
+    public void loadDataFromFiles(List<String> filePath) {
         filePath.forEach(this::loadDataFromFile);
     }
 
-    private Currency toDto(CryptoCurrencyDataReaderResponse source) {
+    private Currency toDto(CurrencyDataReaderResponse source) {
         var cryptoSymbol = new Symbol();
-        cryptoSymbol.setName(SymbolType.of(source.cryptoSymbol()));
+        var symbolType = SymbolType.of(source.cryptoSymbol());
+        if (symbolType == null) {
+            log.error("Symbol time with name {} is not found", source.cryptoSymbol());
+            throw new DataNotFoundException("Symbol time with name %s is not found".formatted(source.cryptoSymbol()));
+        }
+        cryptoSymbol.setName(symbolType);
 
         var cryptoCurrency = new Currency();
         cryptoCurrency.setPrice(source.price());

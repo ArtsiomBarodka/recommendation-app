@@ -22,7 +22,7 @@ public class CurrencyKafkaListener {
     @KafkaListener(topics = "#{'${kafka.topic.currency.name}'.split(',')}",
             groupId = "${kafka.consumer.currency.aggregator.group.id}",
             containerFactory = "currencyKafkaListenerContainerFactory")
-    public void processOrder(List<CurrencyMessage> currencyMessageList,
+    public void processAddedData(List<CurrencyMessage> currencyMessageList,
                              @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
                              @Header(KafkaHeaders.RECEIVED_KEY) String key) {
         log.info("New Notification List is received: topics = {}, keys = {}, items count = {}, currencyList = {}", topic, key, currencyMessageList.size(), currencyMessageList);

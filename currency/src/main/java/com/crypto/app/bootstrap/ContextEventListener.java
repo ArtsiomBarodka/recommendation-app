@@ -19,7 +19,7 @@ public class ContextEventListener {
     public void afterApplicationStartup() {
         if (propertiesConfig.isLoadCurrencyOnStartup()) {
             log.info("Start loading data on Startup");
-            currencyDataLoadFacade.loadDataFromFile(propertiesConfig.getCsvDataCurrencyFiles());
+            currencyDataLoadFacade.loadDataFromFiles(propertiesConfig.getCsvDataCurrencyFiles());
             log.info("Finish loading data on Startup");
         }
     }

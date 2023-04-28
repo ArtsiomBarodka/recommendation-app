@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway
+data:
+  application.properties: |-
+    server.port=8080
+    
+    spring.cloud.gateway.routes[0].id=aggregator
+    spring.cloud.gateway.routes[0].uri=lb://aggregator
+    spring.cloud.gateway.routes[0].predicates[0]=Path=/api/v1/crypto/recommendation/**
+    spring.cloud.gateway.routes[0].predicates[1]=Method=GET
+    spring.cloud.gateway.routes[0].filters[0]=RemoveRequestHeader=Cookie

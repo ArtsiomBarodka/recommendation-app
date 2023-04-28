@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-read-statefulset
+  labels:
+    app: mysql-read
+spec:
+  serviceName: mysql-read
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-read
+  template:
+    metadata:
+      labels:
+        app: mysql-read
+    spec:
+      containers:
+        - name: mysql-read
+          image: mysql:8.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-read-data
+          envFrom:
+            - configMapRef:
+                name: mysql-read-configmap
+            - secretRef:
+                name: mysql-read-secret
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-read-data
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 5Gi

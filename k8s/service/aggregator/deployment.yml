@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aggregator-deployment
+  labels:
+    app: aggregator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aggregator
+  template:
+    metadata:
+      labels:
+        app: aggregator
+    spec:
+      containers:
+        - name: aggregator
+          image: artsiombarodka/aggregator:layered
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - secretRef:
+                name: aggregator
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            failureThreshold: 30
+            periodSeconds: 40
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            failureThreshold: 2
+            periodSeconds: 3
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            failureThreshold: 2
+            periodSeconds: 3
+            successThreshold: 1
+      restartPolicy: Always

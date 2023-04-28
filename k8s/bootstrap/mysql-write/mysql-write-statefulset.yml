@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-write-statefulset
+  labels:
+    app: mysql-write
+spec:
+  serviceName: mysql-write
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-write
+  template:
+    metadata:
+      labels:
+        app: mysql-write
+    spec:
+      containers:
+        - name: mysql-write
+          image: mysql:8.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-write-data
+          envFrom:
+            - configMapRef:
+                name: mysql-write-configmap
+            - secretRef:
+                name: mysql-write-secret
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-write-data
+      spec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 5Gi

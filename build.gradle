@@ -10,6 +10,11 @@ version '0.0.1'
 
 ext {
     junitVersion = '5.9.2'
+    springCloudVersion = '2022.0.2'
+}
+
+bootJar {
+    enabled = false
 }
 
 subprojects {
@@ -37,5 +42,11 @@ subprojects {
 
     bootJar {
         enabled = false
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
     }
 }

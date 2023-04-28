@@ -1,5 +1,8 @@
 # Recommendation Application
 
+## Diagram
+![Диаграмма без названия drawio (2)](https://user-images.githubusercontent.com/34836796/235269204-629ec5eb-29dd-4fc0-b635-43594ad017d8.png)
+
 ## Technologies
 
 **Development**: Java 17, Spring Boot (MVC, Data JPA, Kafka), Spring Cloud (API Gateway, Kubernetes);

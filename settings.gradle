@@ -1,1 +1,5 @@
 rootProject.name = 'recommendation-app'
+include 'currency'
+include 'aggregator'
+include 'common'
+

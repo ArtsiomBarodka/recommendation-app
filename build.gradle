@@ -10,38 +10,32 @@ version '0.0.1'
 
 ext {
     junitVersion = '5.9.2'
-    mySqlConnectorVersion = '8.0.32'
-    liquibaseVersion = '4.21.1'
 }
 
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
-sourceCompatibility = '1.17'
+    sourceCompatibility = '1.17'
 
-repositories {
-    mavenCentral()
-}
+    repositories {
+        mavenCentral()
+    }
 
-dependencies {
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
 
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    }
 
-    implementation "mysql:mysql-connector-java:${mySqlConnectorVersion}"
-    implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+    test {
+        useJUnitPlatform()
+    }
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
-}
-
-test {
-    useJUnitPlatform()
-}
-
-bootJar {
-    enabled = true
+    bootJar {
+        enabled = false
+    }
 }

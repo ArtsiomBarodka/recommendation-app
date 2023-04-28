@@ -8,8 +8,8 @@ public interface NotificationService {
     /**
      * Send notification to Aggregator microservice to sync data.
      *
-     *
-     * @param currency - new Currency item
+     * @param currency  - data
+     * @param eventType - eventType
      */
     void notifyAggregator(@NonNull Currency currency, @NonNull EventType eventType);
 }

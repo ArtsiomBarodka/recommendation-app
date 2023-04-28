@@ -24,6 +24,42 @@ import java.util.Optional;
 public class RecommendationController {
     private final RecommendationFacade recommendationFacade;
 
+    /**
+     *  Return Currency aggregated by aggregator.
+     *  If period and date are not set calculate for the whole period.
+     *  If date is not set calculate for the entire current period (Current Month, Day...).
+     *
+     *  Example 1:
+     *  Request: /api/v1/crypto/recommendation/currencies/DOGE/PRICE_MIN?period=month&date=01-01-2022
+     *  Response: {
+     *   "id": 601,
+     *   "timestamp": "2022-01-22 11:00:00",
+     *   "symbol": {
+     *     "id": 2,
+     *     "name": "DOGE"
+     *   },
+     *   "price": 0.1290
+     * }
+     *
+     * Example 2:
+     * Request: /api/v1/crypto/recommendation/currencies/DOGE/PRICE_MAX
+     * Response: {
+     *   "id": 580,
+     *   "timestamp": "2022-01-14 16:00:00",
+     *   "symbol": {
+     *     "id": 2,
+     *     "name": "DOGE"
+     *   },
+     *   "price": 0.1941
+     * }
+     *
+     * @param symbol - currency symbol
+     * @param aggregator - aggregator for aggregating currency
+     * @param period - optional: to find for specific timePeriod (Month, Day...)
+     * @param date - optional: specific date (dd-MM-yyyy)
+     *
+     * @return CurrencyResponse of symbol for aggregator
+     */
     @GetMapping("currencies/{symbol}/{aggregator}")
     public ResponseEntity<CurrencyResponse> getOldestCryptoCurrency(
             @PathVariable("symbol") String symbol,
@@ -36,6 +72,47 @@ public class RecommendationController {
         return ResponseEntity.ok(toCurrencyResponse(result));
     }
 
+    /**
+     *  Return list of each symbol with calculated normalised range for the whole period.
+     *  It is sorted by range depending on sort rule;
+     *  If sort rule is not set sort by asc;
+     *
+     *  Example 1:
+     *  Request: /api/v1/crypto/recommendation/symbols/with_range?sort=desc
+     *  Response: [
+     *   {
+     *     "id": 3,
+     *     "name": "ETH",
+     *     "normalizedRange": 0.6384
+     *   },
+     *   {
+     *     "id": 5,
+     *     "name": "XRP",
+     *     "normalizedRange": 0.5061
+     *   },
+     *   ...
+     *   ]
+     *
+     *  Example 2:
+     *  Request: /api/v1/crypto/recommendation/symbols/with_range
+     *  Response: [
+     *   {
+     *     "id": 1,
+     *     "name": "BTC",
+     *     "normalizedRange": 0.4341
+     *   },
+     *   {
+     *     "id": 4,
+     *     "name": "LTC",
+     *     "normalizedRange": 0.4652
+     *   },
+     *   ...
+     *   ]
+     *
+     * @param sortBy - optional: direction of sort rule
+     *
+     * @return SymbolResponse list with calculated normalised range
+     */
     @GetMapping("symbols/with_range")
     public ResponseEntity<List<SymbolWithRangeResponse>> getOldestCryptoCurrency(
             @RequestParam(value = "sort", required = false) String sortBy) {
@@ -47,6 +124,23 @@ public class RecommendationController {
                         .toList());
     }
 
+    /**
+     *  Return symbol with the highest calculated normalised range for specific period.
+     *  If date is not set calculate for current period (Current Year, Month, Day)
+     *
+     * Example:
+     * Request: /api/v1/crypto/recommendation/symbols/with_range/max?period=MONTH&date=02-01-2022
+     * Response: {
+     *   "id": 3,
+     *   "name": "ETH",
+     *   "normalizedRange": 0.6384
+     * }
+     *
+     * @param period - specific timePeriod (Month, Day...)
+     * @param date - optional: specific date
+     *
+     * @return SymbolResponse with calculated normalised range
+     */
     @GetMapping("symbols/with_range/max")
     public ResponseEntity<SymbolWithRangeResponse> getOldestCryptoCurrency(
             @RequestParam(value = "period") String period,

@@ -13,7 +13,7 @@
 
 **Testing**: Junit, Mockito, Testcontainers, Spring Test;
 
-**Other**: Git, Rest API, SQRS, Event Sourcing;
+**Other**: Git, Rest API, CQRS, Event Sourcing;
 
 ## Usage
 
